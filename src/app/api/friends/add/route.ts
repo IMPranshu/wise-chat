@@ -13,6 +13,12 @@ export async function POST(req: Request) {
 
     const { email: emailToAdd } = addFriendValidator.parse(body.email);
 
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
     const idToAdd = (await fetchRedis(
       "get",
       `user:email:${emailToAdd}`
@@ -20,12 +26,6 @@ export async function POST(req: Request) {
 
     if (!idToAdd) {
       return new Response("This person does not exist.", { status: 400 });
-    }
-
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return new Response("Unauthorized", { status: 401 });
     }
 
     if (idToAdd === session.user.id) {
@@ -53,7 +53,20 @@ export async function POST(req: Request) {
     )) as 0 | 1;
 
     if (isAlreadyFriends) {
-      return new Response("Already friends with this user", { status: 400 });
+      return new Response("Already added this user", { status: 400 });
+    }
+
+    const isAlreadyReceiveFriendRequest = (await fetchRedis(
+      "sismember",
+      `user:${session.user.id}:incoming_friend_requests`,
+      idToAdd
+    )) as 0 | 1;
+
+    if (isAlreadyReceiveFriendRequest) {
+      return new Response(
+        "This user already invite you first please check your friend requests",
+        { status: 400 }
+      );
     }
 
     // valid request, send friend request
