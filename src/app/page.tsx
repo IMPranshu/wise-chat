@@ -1,5 +1,6 @@
-import Image from "next/image";
+import { db } from "@/lib/db";
 
-export default function Home() {
-  return <div>Helloworld!!</div>;
+export default async function Home() {
+  await db.set("hello", "hello");
+  return <div className="text-red-500">Hellow</div>;
 }
