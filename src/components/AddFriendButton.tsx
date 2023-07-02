@@ -64,7 +64,7 @@ const AddFriendButton: FC<AddFriendButtonProps> = ({}) => {
           placeholder="john@doe.com"
         />
 
-        <Button>Add</Button>
+        <Button className="bg-black">Add</Button>
       </div>
       <p className="mt-1 text-sm text-red-600"> {errors.email?.message}</p>
       {showSuccessState ? (
